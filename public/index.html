@@ -17,10 +17,17 @@
 
     <main>
         <section class="analyzer-form">
-            <form id="url-form">
-                <input type="url" id="url-input" placeholder="Entrez l'URL d'un site web (ex: https://www.google.com)" required>
-                <button type="submit">Analyser</button>
-            </form>
+          
+          <!-- ... dans la section .analyzer-form ... -->
+<form id="url-form">
+    <input type="url" id="url-input" placeholder="Entrez l'URL d'un site web (ex: https://www.google.com)" required>
+    <input type="number" id="visits-input" placeholder="Visites mensuelles (ex: 10000)" min="1" style="max-width: 250px;">
+    <button type="submit">Analyser</button>
+</form>
+<!-- ... -->
+          
+          
+            
         </section>
 
         <div id="loading" class="hidden">
