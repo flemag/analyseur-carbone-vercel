@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const url = urlInput.value;
-        const monthlyVisits = parseInt(visitsInput.value, 10) || 10000; // Valeur par défaut
+        const monthlyVisits = parseInt(visitsInput.value, 10) || 10000;
 
         if (!url) return;
 
@@ -22,13 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ url, monthlyVisits }),
             });
 
-            if (!response.ok) throw new Error(`Erreur HTTP! statut: ${response.status}`);
+            // Si la réponse n'est pas "ok", on essaie de lire le message d'erreur du serveur
+            if (!response.ok) {
+                const errorData = await response.json(); // Le serveur envoie du JSON
+                throw new Error(errorData.message || 'Erreur serveur inconnue');
+            }
+
             const data = await response.json();
             renderReport(data);
 
         } catch (error) {
             console.error('Erreur lors de l\'analyse:', error);
-            resultsContainer.innerHTML = `<div class="report-card"><h2>Erreur</h2><p>Impossible d'analyser le site. Vérifiez l'URL et réessayez.</p></div>`;
+            // On affiche le message d'erreur spécifique venant du serveur
+            resultsContainer.innerHTML = `<div class="report-card"><h2>Erreur d'Analyse</h2><p>${error.message}</p></div>`;
             resultsContainer.classList.remove('hidden');
         } finally {
             loadingContainer.classList.add('hidden');
@@ -100,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.classList.remove('hidden');
     }
     
-    // Fonction helper pour créer un graphique à barres simple
     function renderChart(valueMB, label, totalMB) {
         const percentage = totalMB > 0 ? (valueMB / totalMB) * 100 : 0;
         return `
