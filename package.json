@@ -1,0 +1,12 @@
+{
+  "name": "analyseur-carbone-vercel",
+  "version": "1.0.0",
+  "description": "Un outil d'analyse d'empreinte carbone pour les sites web.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12"
+  }
+}

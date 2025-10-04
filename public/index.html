@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyseur d'Empreinte Carbone Web</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>🌍 Analyseur d'Empreinte Carbone</h1>
+        <p>Évaluez l'impact environnemental de n'importe quel site web.</p>
+    </header>
+
+    <main>
+        <section class="analyzer-form">
+            <form id="url-form">
+                <input type="url" id="url-input" placeholder="Entrez l'URL d'un site web (ex: https://www.google.com)" required>
+                <button type="submit">Analyser</button>
+            </form>
+        </section>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Analyse en cours...</p>
+        </div>
+
+        <section id="results" class="hidden">
+            <!-- Le rapport sera injecté ici par JavaScript -->
+        </section>
+    </main>
+
+    <footer>
+        <p>Fait avec ❤️ pour un web plus durable.</p>
+    </footer>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
