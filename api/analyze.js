@@ -1,4 +1,5 @@
-import cheerio from 'cheerio';
+// On utilise l'ancienne syntaxe 'require' qui est plus stable sur Vercel
+const cheerio = require('cheerio');
 
 // Helper pour faire des requêtes fetch avec timeout et un User-Agent
 const fetchWithTimeout = (url, options = {}, timeout = 8000) => {
@@ -17,28 +18,20 @@ const fetchWithTimeout = (url, options = {}, timeout = 8000) => {
 };
 
 export default async function handler(req, res) {
-    console.log("--- DÉBUT DE LA FONCTION ---");
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Méthode non autorisée' });
     }
 
     const { url } = req.body;
-    console.log(`URL reçue: ${url}`);
     if (!url) {
         return res.status(400).json({ message: 'URL manquante' });
     }
 
     let html;
     try {
-        console.log("Tentative de récupération du HTML...");
         const siteResponse = await fetchWithTimeout(url);
-        console.log(`Réponse reçue, statut: ${siteResponse.status}`);
         if (!siteResponse.ok) throw new Error(`Statut HTTP: ${siteResponse.status}`);
-        
         html = await siteResponse.text();
-        console.log(`HTML récupéré. Type: ${typeof html}, Longueur: ${html ? html.length : 'N/A'}`);
-        console.log(`Début du HTML: ${html ? html.substring(0, 100) : 'N/A'}`);
-
     } catch (error) {
         console.error(`Échec de la récupération du site ${url}:`, error.message);
         const message = error.message.includes('redirect count exceeded')
@@ -47,29 +40,12 @@ export default async function handler(req, res) {
         return res.status(500).json({ message });
     }
 
-    // *** VÉRIFICATION AVEC LOGS ***
-    console.log("Vérification de la validité du HTML...");
-    if (!html) {
-        console.log("ERREUR : La variable 'html' est falsy (null, undefined, false, 0, '').");
-        return res.status(500).json({ message: `Le site ${url} a renvoyé une réponse vide.` });
+    if (!html || typeof html !== 'string' || html.trim().length === 0) {
+        return res.status(500).json({ message: `Le site ${url} a renvoyé une page vide ou invalide.` });
     }
-    if (typeof html !== 'string') {
-        console.log(`ERREUR : La variable 'html' n'est pas une string, son type est ${typeof html}.`);
-        return res.status(500).json({ message: `Le site ${url} a renvoyé une réponse invalide.` });
-    }
-    if (html.trim().length === 0) {
-        console.log("ERREUR : La variable 'html' est une string vide.");
-        return res.status(500).json({ message: `Le site ${url} a renvoyé une page blanche.` });
-    }
-    console.log("Le HTML semble valide. Continuation...");
 
-
-    // On met tout le reste dans un try...catch final pour isoler le problème
     try {
-        console.log("Tentative de charger le HTML avec Cheerio...");
         const $ = cheerio.load(html);
-        console.log("Cheerio a chargé le HTML avec succès.");
-
         let totalBytes = new Blob([html]).size;
         const breakdown = { images: 0, scripts: 0, css: 0, other: totalBytes };
 
@@ -127,13 +103,24 @@ export default async function handler(req, res) {
         if (!hostingInfo.isGreen) recommendations.push("🌱 Votre hébergeur n'est pas répertorié comme vert. Changer pour un hébergeur vert est l'action la plus impactante.");
         if (recommendations.length === 0) recommendations.push("✅ Excellent ! Votre site semble bien optimisé.");
 
-        const reportData = { co2Grams, totalDataMB, breakdown: { images: breakdown.images / (1024 * 1024), scripts: breakdown.scripts / (1024 * 1024), css: breakdown.css / (1024 * 1024), other: breakdown.other / (1024 * 1024) }, hosting: hostingInfo, recommendations };
-        console.log("--- SUCCÈS DE LA FONCTION ---");
+        const reportData = {
+            co2Grams,
+            totalDataMB,
+            breakdown: {
+                images: breakdown.images / (1024 * 1024),
+                scripts: breakdown.scripts / (1024 * 1024),
+                css: breakdown.css / (1024 * 1024),
+                other: breakdown.other / (1024 * 1024),
+            },
+            hosting: hostingInfo,
+            recommendations
+        };
+
         res.status(200).json(reportData);
 
     } catch (finalError) {
-        console.error('ERREUR CRITIQUE DANS LE BLOC FINAL:', finalError);
-        res.status(500).json({ message: 'Une erreur inattendue est survenue lors du traitement.', details: finalError.message });
+        console.error('Erreur critique lors du traitement:', finalError);
+        res.status(500).json({ message: 'Une erreur inattendue est survenue.', details: finalError.message });
     }
 }
 
